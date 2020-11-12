@@ -12,13 +12,14 @@
 /*
 1.0 lettura csv 1.1 caricamento
 2.0 rm ordering
-
 */
 typedef struct record {
     int numero;
     char nome[DIM], autore[DIM];
     bool riprodotte;
 }Tiporecord;
+
+int contarighe(FILE *fp);
 
 void lettura(FILE *fp, Tiporecord *canzoni);
 
@@ -31,7 +32,11 @@ int main(){
         printf ("Errore \n");
         return -1;
     }
-    Tiporecord carica[DIM];
+    int n_righe = contarighe(puntatore);
+    
+    puntatore = fopen("sputifi.csv", "r");
+
+    Tiporecord* carica = (Tiporecord*)malloc(sizeof (Tiporecord)*n_righe);
 
     lettura(puntatore, carica);
 
@@ -65,8 +70,6 @@ void lettura(FILE *fp, Tiporecord *canzoni){
         field = strtok(NULL, CARATTERE);    
         strcpy(canzoni[cont].autore, field);
         //autore
-
-        canzoni[cont].riprodotte=
         
         cont++;  
                                   
@@ -101,4 +104,11 @@ void stampa_r(FILE *fp, Tiporecord *canzoni){
 
 }
 
-
+int contarighe(FILE *fp){
+    int cont = 0;
+    char stringa[DIM];
+    while (fgets(stringa,DIM,fp)){
+        cont++;
+    }
+    return cont;
+}
