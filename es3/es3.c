@@ -7,22 +7,20 @@
 #define DIM 50
 #define CARATTERE ","
 
-
-/*
-1.0 lettura csv 1.1 caricamento
-2.0 rm ordering
-*/
 typedef struct record {
-    int numero;
-    char nome[DIM], autore[DIM];
-    bool riprodotte;
+    int numero; //numero della canzone
+    char nome[DIM], autore[DIM]; //nome e autore della canzone
+    struct record * next;
+    bool riprodotte; //canzone già riprodotta o no
 }Tiporecord;
 
-int contarighe(FILE *fp);
+void primacanzone(Tiporecord* head, char* stringa);
 
-void lettura(FILE *fp, Tiporecord *canzoni);
+void push(Tiporecord* head, char* stringa);
 
-void stampa_r(FILE *fp, Tiporecord *canzoni, int ncanzoni); //richiamo il file, l'array di struct e il numero di canzoni
+int lettura(FILE *fp, Tiporecord *head);
+
+void stampa(Tiporecord *head, int ncanzoni);
 
 int main(){
     FILE* puntatore=fopen("sputifi.csv", "r");
@@ -31,80 +29,119 @@ int main(){
         printf ("Errore \n");
         return -1;
     }
-    int n_righe = contarighe(puntatore);
     
     puntatore = fopen("sputifi.csv", "r");
 
-    Tiporecord* carica = (Tiporecord*)malloc(sizeof (Tiporecord)*n_righe);
+    Tiporecord* prima_canzone = (Tiporecord*)malloc(sizeof (Tiporecord));
 
-    lettura(puntatore, carica);
+    printf("Inizio la lettura.\n");
 
-    stampa_r(puntatore, carica, n_righe); 
-    free(carica);//
+    int numcanzoni = lettura(puntatore, prima_canzone);
+
+    stampa(prima_canzone, numcanzoni);
 
     fclose (puntatore);
     return 0;
 }
 
-void lettura(FILE *fp, Tiporecord *canzoni){
-//la funzione legge il file e carica nell'array di strutture le varie componenti
-    int cont=0;
-    char stringa[DIM]; 
-    char *field;//è un arrey di char in cui non è definita la lunghezza
+void primacanzone(Tiporecord* head, char* stringa){
+    // aggiunge i dati della prima canzone all'inizio della lista
+
+    char *field;
+
+    //0,nomecanzone,autore
+
     
-    while(fgets(stringa,DIM,fp)){
-           
-        field = strtok(stringa, CARATTERE); //salva in field la prima parte separata da stringa; strtok si tiene in memoria il numero della riga e quindi continua a lavorare sulla stessa riga
-        (canzoni+cont)->numero = atoi(field); //atoi da stringa a numero intero; 
-        //numero,nome,autore
+    field = strtok(stringa, CARATTERE); // salvo in field la prima parte di stringa separata dalla virgola: "0" (lo zero è un carattere non un numero intero)
+    head->numero = atoi(field); // salvo il numero della canzone trasformato in intero
 
-        field = strtok(NULL, CARATTERE);
-        strcpy((canzoni+cont)->nome, field);//prende in memoria una stringa e la duplica in un altra variabile
-        //nome,autore
+    field = strtok(NULL, CARATTERE); // salvo in field la seconda parte di stringa separata dalle virgole: "nomecanzone"
+    strcpy(head->nome, field); // salvo il nome della canzone
 
-        field = strtok(NULL, CARATTERE);    
-        strcpy((canzoni+cont)->autore, field);
-        //autore
-        
-        cont++;  
-                                  
-    }
-}
+    field = strtok(NULL, CARATTERE); // salvo in field la terza parte di stringa separata dalle virgole: "autore"
+    strcpy(head->autore, field); // salvo il nome dell'autore che ha prodotto la canzone
 
-void stampa_r(FILE *fp, Tiporecord *canzoni, int ncanzoni){
-//stampa in modo randomico le canzoni
-    int nriproduzioni;
-    int rm;
-    printf("Quante volte vuoi riprodurre la playlist? ");
-    scanf("%d", &nriproduzioni);
-    for (int n = 0; n < ncanzoni; n++){
-        (canzoni+n)->riprodotte = false;                               //se è false la canzone non è stata riprodotta mentre se è true è già stata riprodotta
-    }
-    for (int i = 0; i < nriproduzioni; i++) {                              //si riproducono tutte le canzoni nriproduzioni volte
-        printf("Sto riproducendo per la %d^ volta.\n\n", i+1);
+    head->riprodotte = false; //setto la canzone come non riprodotta
 
-        for (int j = 0; j < ncanzoni; j++)                                //per ogni canzone                                    
-            {
-                do{
-                    rm = rand() % ncanzoni;
-                }while ((canzoni+rm)->riprodotte);                         //ripete finchè la canzone non è stata riprodotta: quindi riprodotte==false
-                    
-                 (canzoni+rm)->riprodotte = true;                            //esce dal do while solo se tutte la canzoni sono state riprodotte
-                printf("sto riproducendo:\n%s\n%s\t\n\n", (canzoni+rm)->nome, (canzoni+rm)->autore);         
-            }
-            for (int k = 0; k < ncanzoni; k++){
-                (canzoni+k)->riprodotte = false;                                   //resetto la playlist
-            }
-    }
+
+    head -> next = NULL; // setto la testa come ultimo elemento della lista
 
 }
 
-int contarighe(FILE *fp){
-//conta le righe del file
-    int cont = 0; //contatore delle righe
+void push(Tiporecord* head, char* stringa){
+    //aggiunge i dati della canzone in fondo alla lista
+
+    char *field; //inizializzo una strigna d'appoggio di dimensione non specificata.
+
+    Tiporecord* puntatore_appoggio = head;
+
+    while(puntatore_appoggio->next != NULL){
+
+        puntatore_appoggio = puntatore_appoggio->next;
+
+    }//scorro la lista fino a quando non arrivo all'ultimo elemento
+
+
+    puntatore_appoggio->next = (Tiporecord*)malloc(sizeof(Tiporecord));
+
+    //1,nomecanzone,autore
+
+    field = strtok(stringa, CARATTERE); // salvo in field la prima parte di stringa separata dalla virgola: "1" (l'uno è un carattere non un numero intero)
+    puntatore_appoggio->next->numero = atoi(field); //puntatore_appoggio->next ha la valenza dell'ultimo nome; salvo il numero della canzone trasformato in intero
+    
+    field = strtok(NULL, CARATTERE); // salvo in field la seconda parte di stringa separata dalle virgole: "nomecanzone"
+    strcpy(puntatore_appoggio->next->nome, field); // salvo il nome della canzone
+
+    field = strtok(NULL, CARATTERE); // salvo in field la terza parte di stringa separata dalle virgole: "autore"
+    strcpy(puntatore_appoggio->next->autore, field);// salvo il nome dell'autore che ha prodotto la canzone
+
+    puntatore_appoggio->next->riprodotte = false; //setto la canzone come non riprodotta
+
+} 
+
+int lettura(FILE *fp, Tiporecord *head){
+//la funzione legge il file e carica nella lista le varie canzoni
+    
+    int cont=0; //numero di canzoni
     char stringa[DIM];
-    while (fgets(stringa,DIM,fp)){ //scorro le varie righe del file
-        cont++; //aggiungo una riga
+
+    fgets(stringa,DIM,fp); //salvo in stringa la prima riga del file.
+
+    primacanzone(head, stringa);
+    
+    while(fgets(stringa,DIM,fp)){//in ogni ciclo viene salvata una riga del file, partendo dalla seconda, in striga. quando termina il file la finzione fgets ritorna NULL 
+
+        push(head, stringa); // viene passata in push la prima canzone, ovvero la testa della lista, e la stringa da salvare a fine lista
+
+        cont++;
     }
-    return cont;
+
+    printf("\nlettura terminata!\n");
+
+    return cont;// ritorno nel main il numero 
+}
+
+void stampa(Tiporecord *head, int ncanzoni){
+    //riproduce le canzoni in modo casuale
+
+    printf("\ninizio reiproduzione delle canzoni, numero di canzoni: %d\n\n", ncanzoni);
+
+    Tiporecord* puntatore_appoggio;
+    int rm; //variabile che contiene il numero randomico
+
+    for (int j = 0; j < ncanzoni; j++){
+        do{
+            puntatore_appoggio = head; //puntatore_appggio punta alla prima canzone
+            rm = rand() % ncanzoni; //genero un numero randomico
+
+            for (int i=0; i < rm; i++){ //cerco la canzone numero rm
+                puntatore_appoggio = puntatore_appoggio -> next;
+            }
+
+        }while(puntatore_appoggio->next->riprodotte); //guardo se la canzone rm è già stata riprodotta
+
+        puntatore_appoggio->next->riprodotte = true; //setto la canzone come già riprodotta
+
+        printf("sto riproducendo:\n%s\n%s\t\n\n", puntatore_appoggio->next->nome, puntatore_appoggio->next->autore); //riproduco la canzone
+    }
 }
