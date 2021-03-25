@@ -14,9 +14,7 @@ typedef struct record {
     bool riprodotte; //canzone già riprodotta o no
 }Tiporecord;
 
-void primacanzone(Tiporecord* head, char* stringa);
-
-void push(Tiporecord* head, char* stringa);
+void push(Tiporecord* head, char* stringa, int cont);
 
 int lettura(FILE *fp, Tiporecord *head);
 
@@ -44,59 +42,53 @@ int main(){
     return 0;
 }
 
-void primacanzone(Tiporecord* head, char* stringa){
-    // aggiunge i dati della prima canzone all'inizio della lista
-
-    char *field;
-
-    //0,nomecanzone,autore
-
-    
-    field = strtok(stringa, CARATTERE); // salvo in field la prima parte di stringa separata dalla virgola: "0" (lo zero è un carattere non un numero intero)
-    head->numero = atoi(field); // salvo il numero della canzone trasformato in intero
-
-    field = strtok(NULL, CARATTERE); // salvo in field la seconda parte di stringa separata dalle virgole: "nomecanzone"
-    strcpy(head->nome, field); // salvo il nome della canzone
-
-    field = strtok(NULL, CARATTERE); // salvo in field la terza parte di stringa separata dalle virgole: "autore"
-    strcpy(head->autore, field); // salvo il nome dell'autore che ha prodotto la canzone
-
-    head->riprodotte = false; //setto la canzone come non riprodotta
-
-
-    head -> next = NULL; // setto la testa come ultimo elemento della lista
-
-}
-
-void push(Tiporecord* head, char* stringa){
+void push(Tiporecord* head, char* stringa, int cont){
     //aggiunge i dati della canzone in fondo alla lista
 
     char *field; //inizializzo una strigna d'appoggio di dimensione non specificata.
 
-    Tiporecord* puntatore_appoggio = head;
+    if(cont == 0){
+        //0,nomecanzone,autore
 
-    while(puntatore_appoggio->next != NULL){
+        field = strtok(stringa, CARATTERE); // salvo in field la prima parte di stringa separata dalla virgola: "0" (lo zero è un carattere non un numero intero)
+        head->numero = atoi(field); // salvo il numero della canzone trasformato in intero
 
-        puntatore_appoggio = puntatore_appoggio->next;
+        field = strtok(NULL, CARATTERE); // salvo in field la seconda parte di stringa separata dalle virgole: "nomecanzone"
+        strcpy(head->nome, field); // salvo il nome della canzone
 
-    }//scorro la lista fino a quando non arrivo all'ultimo elemento
+        field = strtok(NULL, CARATTERE); // salvo in field la terza parte di stringa separata dalle virgole: "autore"
+        strcpy(head->autore, field); // salvo il nome dell'autore che ha prodotto la canzone
+
+        head->riprodotte = false; //setto la canzone come non riprodotta
+
+        head -> next = NULL; // setto la testa come ultimo elemento della lista
+    }
+    else{
+        Tiporecord* puntatore_appoggio = head;
+
+        while(puntatore_appoggio->next != NULL){
+
+            puntatore_appoggio = puntatore_appoggio->next;
+        
+        }//scorro la lista fino a quando non arrivo all'ultimo elemento
 
 
-    puntatore_appoggio->next = (Tiporecord*)malloc(sizeof(Tiporecord));
+        puntatore_appoggio->next = (Tiporecord*)malloc(sizeof(Tiporecord));
 
-    //1,nomecanzone,autore
+        //1,nomecanzone,autore
 
-    field = strtok(stringa, CARATTERE); // salvo in field la prima parte di stringa separata dalla virgola: "1" (l'uno è un carattere non un numero intero)
-    puntatore_appoggio->next->numero = atoi(field); //puntatore_appoggio->next ha la valenza dell'ultimo nome; salvo il numero della canzone trasformato in intero
-    
-    field = strtok(NULL, CARATTERE); // salvo in field la seconda parte di stringa separata dalle virgole: "nomecanzone"
-    strcpy(puntatore_appoggio->next->nome, field); // salvo il nome della canzone
+        field = strtok(stringa, CARATTERE); // salvo in field la prima parte di stringa separata dalla virgola: "1" (l'uno è un carattere non un numero intero)
+        puntatore_appoggio->next->numero = atoi(field); //puntatore_appoggio->next ha la valenza dell'ultimo nome; salvo il numero della canzone trasformato in intero
+        
+        field = strtok(NULL, CARATTERE); // salvo in field la seconda parte di stringa separata dalle virgole: "nomecanzone"
+        strcpy(puntatore_appoggio->next->nome, field); // salvo il nome della canzone
 
-    field = strtok(NULL, CARATTERE); // salvo in field la terza parte di stringa separata dalle virgole: "autore"
-    strcpy(puntatore_appoggio->next->autore, field);// salvo il nome dell'autore che ha prodotto la canzone
+        field = strtok(NULL, CARATTERE); // salvo in field la terza parte di stringa separata dalle virgole: "autore"
+        strcpy(puntatore_appoggio->next->autore, field);// salvo il nome dell'autore che ha prodotto la canzone
 
-    puntatore_appoggio->next->riprodotte = false; //setto la canzone come non riprodotta
-
+        puntatore_appoggio->next->riprodotte = false; //setto la canzone come non riprodotta
+        puntatore_appoggio->next->next=NULL; //setto la linea successiva come l'ultima
+    }
 } 
 
 int lettura(FILE *fp, Tiporecord *head){
@@ -104,17 +96,14 @@ int lettura(FILE *fp, Tiporecord *head){
     
     int cont=0; //numero di canzoni
     char stringa[DIM];
-
-    fgets(stringa,DIM,fp); //salvo in stringa la prima riga del file.
-
-    primacanzone(head, stringa);
     
     while(fgets(stringa,DIM,fp)){//in ogni ciclo viene salvata una riga del file, partendo dalla seconda, in striga. quando termina il file la finzione fgets ritorna NULL 
 
-        push(head, stringa); // viene passata in push la prima canzone, ovvero la testa della lista, e la stringa da salvare a fine lista
+        push(head, stringa, cont); // viene passata in push la prima canzone, ovvero la testa della lista, e la stringa da salvare a fine lista
 
         cont++;
     }
+    cont--;
 
     printf("\nlettura terminata!\n");
 
