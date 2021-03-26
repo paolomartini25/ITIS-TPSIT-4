@@ -1,3 +1,24 @@
+/*
+Un mazzo di carte da gioco è costituito da 52 carte: 13 carte per ogni seme. Realizzare un programma in linguaggio C in cui ogni seme è rappresentato da un char :
+‘C’: cuori
+‘P’: picche
+‘D’: quadri
+‘F’: fiori
+mentre ogni carta di un seme è rappresentata da un numero intero compreso tra 1 e 13.
+
+All’interno del programma:
+
+Realizzate una struttura auto-referenziata opportuna che permetta di memorizzare l’intero mazzo di carte sotto forma di coda FIFO. 
+
+All’interno del main(), riempire il mazzo di carte, utilizzando l’opportuno metodo delle code. (BONUS: riempire il mazzo con le carte in ordine casuale)
+
+Successivamente all’interno del main() realizzate il seguente procedimento:
+Ad ogni turno viene estratta la carta in fondo al mazzo
+Se la carta estratta è nera (fiori o picche) viene scartata, altrimenti se la carta estratta è rossa (cuori o quadri) essa viene collocata in cima al mazzo
+I turni finiscono quando il mazzo è composto soltanto di carte rosse
+Stampate tutte le carte del mazzo dopo l’intero procedimento
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
